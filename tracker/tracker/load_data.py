@@ -73,9 +73,11 @@ def load_files_in_a_folder(dir_path):
     """
     files = [join(dir_path, f) for f in listdir(dir_path) if isfile(join(dir_path, f))
              and f.endswith('.csv')]
+    loaded_files = []
     for file in files:
         print("loading file {} ..".format(file))
         status = import_csv(csv_path=file)
         if status:
-            print("loaded...")
+            loaded_files.append(file)
+    return files
 

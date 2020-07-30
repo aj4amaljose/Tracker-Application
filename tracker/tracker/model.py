@@ -1,14 +1,13 @@
 """
 Handles db utilities
 """
-from tracker.tracker import db_url
+import os
 from sqlalchemy import create_engine, Column, String, Integer, VARCHAR, Date, and_, or_
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, query
 
 
-# db_url = "sqlite:///C://Users//Amal.Jose01//ml//dataf.db" # Add db path to db_url
-engine = create_engine(db_url)
+engine = create_engine(os.environ['TRACKER_DB_URL'])
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
 session = Session()

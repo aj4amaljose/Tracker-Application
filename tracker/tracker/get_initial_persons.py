@@ -58,15 +58,22 @@ class TrackerHelper(Handler):
 
     @Handler.property_memorized
     def get_persons_related(self):
+        """
+        Get persons contact to the person
+        :return:
+        """
+        persons = []
         tracks = self.get_track_details
-        results = get_related_persons(tracks=tracks)
-        person_social_nos = {
-            row.person_social_no for row in results if row.person_social_no != self.person_id}
-        persons = get_person_details(person_social_nos=person_social_nos)
+        print("fhsidfs{}".format(tracks))
+        if tracks:
+            results = get_related_persons(tracks=tracks)
+            person_social_nos = {
+                row.person_social_no for row in results if row.person_social_no != self.person_id}
+            persons = get_person_details(person_social_nos=person_social_nos)
         return persons
 
     def get_visualisation(self):
-        create_visualization(self)
+        return create_visualization(self)
 
 
 

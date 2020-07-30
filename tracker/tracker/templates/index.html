@@ -1,14 +1,21 @@
 <!DOCTYPE HTML>
 <html>
 <head>
+    <style>
+        h1 {text-align: center;}
+        p {text-align: center;}
+        div {text-align: center;}
+        form {text-align: center;}
+    </style>
+    <h1>Person Of Interest</h1>
 </head>
-<body>
+<body style="background-color:powderblue;text-align:center">
 <form action="/modeSelection" method="post">
-    <p>Please select the Mode:</p>
+    <h4>Please select the Mode:</h4>
     <input type="radio" id="load" name="mode" value="load">
-    <label for="load">Import Data</label><br>
+    <label for="load">Import Data</label>
     <input type="radio" id="analyse" name="mode" value="analyse">
-    <label for="analyse">Track person</label><br>
+    <label for="analyse">Track person</label>
     <input type="submit" value="Submit"/>
 </form>
 </body>

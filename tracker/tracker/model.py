@@ -129,6 +129,3 @@ def insert_data(new_rows):
     session.bulk_save_objects(new_rows)
     session.commit()
 
-
-# drop_all_tables()
-# create_all_tables()

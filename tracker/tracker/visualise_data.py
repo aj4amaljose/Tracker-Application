@@ -6,10 +6,11 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 
-def create_visualization(tracker):
+def create_visualization(tracker, local=True):
     """
-    Creates a visualization for direct Nodes
+    Creates a visualization for direct contacts for the given peron
     :param tracker: Tracker details of the Person
+    :param local:
     :return: Image
     """
     graph = nx.DiGraph()
@@ -24,5 +25,11 @@ def create_visualization(tracker):
     ouput_dir = os.environ['TRACKER_GRAPH_FOLDER']
     path = ouput_dir + r'\\' + image_name
     plt.savefig(path)
-    temp_out = os.environ['TRACKER_HTTP_SERVER'] + r'/' + image_name
+    if local:
+        temp_out = os.environ['TRACKER_HTTP_SERVER'] + r'/' + image_name
+        """Temporary hack for showing local images in browser, as browser security won't allow. 
+        Read through https://chrome.google.com/webstore/detail/web-server-for-chrome/ofhbbkphhbklhfoeikjpcbhemlocgigb """
+    else:
+        temp_out = None
+        # todo Write code to push file to another location and get the URL for the graph image
     return temp_out

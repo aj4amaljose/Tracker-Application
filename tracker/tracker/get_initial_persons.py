@@ -64,7 +64,6 @@ class TrackerHelper(Handler):
         """
         persons = []
         tracks = self.get_track_details
-        print("fhsidfs{}".format(tracks))
         if tracks:
             results = get_related_persons(tracks=tracks)
             person_social_nos = {

@@ -10,9 +10,9 @@ Steps to be followed:
  3. clone from https://github.com/aj4amaljose/Tracker-Application.git
  4. Add extension https://chrome.google.com/webstore/detail/web-server-for-chrome/ofhbbkphhbklhfoeikjpcbhemlocgigb  for local development(optional)
  5. Set Environmental variables 
-    . TRACKER_DB_URL - DataBase Url
-    . TRACKER_GRAPH_FOLDER - Local directory for saving Cluster Images
-    . TRACKER_HTTP_SERVER - Provide the server details set in step 4 or the server where you want to save and pull the generated cluster image
+    1. TRACKER_DB_URL - DataBase Url
+    2. TRACKER_GRAPH_FOLDER - Local directory for saving Cluster Images
+    3. TRACKER_HTTP_SERVER - Provide the server details set in step 4 or the server where you want to save and pull the generated cluster image
 
 WorkFlows
 

@@ -1,8 +1,16 @@
 <!DOCTYPE HTML>
 <html>
 <head>
+    <h3 style="background-color:green; color: white">Import Details</h3>
 </head>
 <body>
-<h3>Successfully loaded files ..</h3>
+{% if files %}
+<p style="color: green">Successfully loaded..</p>
+<p>Loaded Files: {{files}}</p>
+{% else %}
+<p>No files are imported</p>
+{% endif %}
+
+
 </body>
 </html>

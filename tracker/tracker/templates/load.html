@@ -1,11 +1,22 @@
 <!DOCTYPE HTML>
 <html>
 <head>
+    <style>
+.center {
+  margin: auto;
+  width: 60%;
+  border: 3px solid #73AD21;
+  padding: 10px;
+}
+    </style>
 </head>
-<body style="background-color:powderblue;text-align: center;">
+<body style="background-color:powderblue;">
 <form action="/load_files" method="post">
-    Upload Directory Path<input type="text" name="directory_path"/>
-    <input type="submit" value="Submit"/>
+    <div class="centre">
+        <p>Upload Directory Path</p>
+        <input type="text" name="directory_path"/>
+        <input type="submit" value="Submit"/>
+    </div>
 </form>
 </body>
 </html>

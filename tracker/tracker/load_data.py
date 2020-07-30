@@ -2,9 +2,8 @@
 Helps to load Mandatory Data to track a Person
 """
 import csv
+from os import listdir, path
 from datetime import datetime
-from os import listdir
-from os.path import isfile, join
 from tracker.tracker import model
 
 FILE_MAPPING = {
@@ -71,13 +70,13 @@ def load_files_in_a_folder(dir_path):
     Load files in a folder to db
     :param dir_path: Directory full path
     """
-    files = [join(dir_path, f) for f in listdir(dir_path) if isfile(join(dir_path, f))
+    files = [path.join(dir_path, f) for f in listdir(dir_path) if path.isfile(path.join(dir_path, f))
              and f.endswith('.csv')]
     loaded_files = []
     for file in files:
-        print("loading file {} ..".format(file))
         status = import_csv(csv_path=file)
         if status:
-            loaded_files.append(file)
-    return files
+            file_name = path.basename(file)
+            loaded_files.append(file_name)
+    return loaded_files
 

@@ -41,6 +41,16 @@ class TrackerHelper(Handler):
         self.person_id = person_id
         self.no_of_days = no_of_days
 
+    @property
+    def identity_validation(self):
+        return all([self.validate_person_details()])
+
+    def validate_person_details(self):
+        if self.person_details:
+            return True
+        else:
+            return False
+
     @Handler.property_memorized
     def person_details(self):
         return get_person_details([self.person_id])
@@ -73,7 +83,5 @@ class TrackerHelper(Handler):
 
     def get_visualisation(self):
         return create_visualization(self)
-
-
 
 

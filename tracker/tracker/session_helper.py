@@ -1,5 +1,5 @@
 """
-Helps to create maintain session
+Helps to create & maintains session
 """
 import functools
 from contextlib import contextmanager
@@ -22,7 +22,7 @@ def session_scope(session):
 
 def create_session(engine):
     """
-
+    Create session in Database
     """
     session_ = sessionmaker(bind=engine)
     session = session_()

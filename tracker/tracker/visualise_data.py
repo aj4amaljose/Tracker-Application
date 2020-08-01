@@ -2,8 +2,10 @@
 Helps to visualize the relationship
 """
 import os
+import time
 import networkx as nx
 import matplotlib.pyplot as plt
+from tracker.tracker import utils
 
 
 def create_visualization(tracker):
@@ -14,17 +16,19 @@ def create_visualization(tracker):
     """
     graph = nx.DiGraph()
     graph.add_node(tracker.person_id)
+
     for person in tracker.get_persons_related:
         graph.add_node(person.social_no)
         graph.add_edge(tracker.person_id, person.social_no)
-    plt.title('{}_track'.format(tracker.person_id))
+
     pos = nx.spring_layout(graph)
     nx.draw(graph, pos, with_labels=True, arrows=False)
-    image_name = '{}_track.png'.format(tracker.person_id)
-    ouput_dir = os.environ['TRACKER_GRAPH_FOLDER']
-    path = ouput_dir + r'\\' + image_name
+
+    time_str = time.strftime("%Y%m%d-%H%M%S")
+    image_name = '{}_track_{}.png'.format(tracker.person_id, time_str)
+    output_dir = os.environ['TRACKER_GRAPH_FOLDER']
+    path = output_dir + r'\\' + image_name
+    utils.delete_file_if_exists(path)
     plt.savefig(path)
     temp_out = os.environ['TRACKER_HTTP_SERVER'] + r'/' + image_name
-    """Temporary hack for showing local images in browser, as browser security won't allow. 
-    Read through https://chrome.google.com/webstore/detail/web-server-for-chrome/ofhbbkphhbklhfoeikjpcbhemlocgigb"""
     return temp_out

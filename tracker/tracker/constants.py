@@ -1,7 +1,7 @@
 """
 Handles constant data
 """
-MISSING_SOCIAL_NO = "Please reload and provide Social Number of the person"
-MISSING_IDENTITY = "Identity Not Found. Please reload and provide a valid ID"
-MISSING_DIR = "Please reload and provide directory path"
+MISSING_SOCIAL_NO = "Provide social number of the person"
+MISSING_IDENTITY = "Identity not found. Provide a valid ID"
+MISSING_DIR = "Provide directory path"
 NO_FILES = "No files were imported"

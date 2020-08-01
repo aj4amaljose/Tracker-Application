@@ -10,6 +10,7 @@ class Handler(object):
     """
     Base Handler for Trackers
     """
+
     def __init__(self):
         pass
 
@@ -21,6 +22,7 @@ class Handler(object):
         :param func: Function
         :return: Calculated Value or Stored Value
         """
+
         def inner(self):
             cache_attr = '_attr_cache_{}'.format(func.__name__)
             if hasattr(self, cache_attr):
@@ -29,6 +31,7 @@ class Handler(object):
                 value = func(self)
                 setattr(self, cache_attr, value)
                 return value
+
         return property(inner)
 
 
@@ -36,10 +39,12 @@ class TrackerHelper(Handler):
     """
     Find out Persons who can be in contact with the interested person.
     """
-    def __init__(self, person_id, no_of_days):
+
+    def __init__(self, person_id, no_of_days, session):
         super(TrackerHelper, self).__init__()
         self.person_id = person_id
         self.no_of_days = no_of_days
+        self.session = session
 
     @property
     def identity_validation(self):
@@ -53,7 +58,7 @@ class TrackerHelper(Handler):
 
     @Handler.property_memorized
     def person_details(self):
-        return get_person_details([self.person_id])
+        return get_person_details([self.person_id], session=self.session)
 
     @Handler.property_memorized
     def calculated_date(self):
@@ -64,7 +69,8 @@ class TrackerHelper(Handler):
     @property
     def get_track_details(self):
         return get_track_details(lower_date=self.calculated_date,
-                                 person_social_no=self.person_id)
+                                 person_social_no=self.person_id,
+                                 session=self.session)
 
     @Handler.property_memorized
     def get_persons_related(self):
@@ -75,13 +81,11 @@ class TrackerHelper(Handler):
         persons = []
         tracks = self.get_track_details
         if tracks:
-            results = get_related_persons(tracks=tracks)
+            results = get_related_persons(tracks=tracks, session=self.session)
             person_social_nos = {
                 row.person_social_no for row in results if row.person_social_no != self.person_id}
-            persons = get_person_details(person_social_nos=person_social_nos)
+            persons = get_person_details(person_social_nos=person_social_nos, session=self.session)
         return persons
 
     def get_visualisation(self):
         return create_visualization(self)
-
-

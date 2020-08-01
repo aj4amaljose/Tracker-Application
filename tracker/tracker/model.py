@@ -1,16 +1,11 @@
 """
 Handles db utilities
 """
-import os
-from sqlalchemy import create_engine, Column, String, Integer, VARCHAR, Date, and_, or_
+
+from sqlalchemy import Column, String, Integer, VARCHAR, Date, and_, or_
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, query
 
-
-engine = create_engine(os.environ['TRACKER_DB_URL'])
 Base = declarative_base()
-Session = sessionmaker(bind=engine)
-session = Session()
 
 
 class TemplateTable(object):
@@ -48,49 +43,54 @@ class TrackerData(Base):
     date = Column(Date)
 
 
-def get_track_details(person_social_no, lower_date):
+def get_track_details(person_social_no, lower_date, session):
     """
     Get Track details of person for a unique social no and date range
 
     :param person_social_no: Unique Social No
     :param lower_date: Lower Date Range
+    :param session: Database session
     :return: Tracking details of the person for given range of Dates
     """
-    values = query.Query([TrackerData], session=session).filter(
+    values = session.query(TrackerData).filter(
         TrackerData.person_social_no == person_social_no).filter(
         TrackerData.date >= lower_date).all()
     return values
 
 
-def get_person_details(person_social_nos):
+def get_person_details(person_social_nos, session):
     """
     Get Person details from the Identity Table
 
     :param person_social_nos: Social Numbers whose details are required
+    :param session: Database session
     :return: Identity Details
     """
-    persons = query.Query([Identity], session=session).filter(
+    persons = session.query(Identity).filter(
         Identity.social_no.in_(person_social_nos)).all()
     return persons
 
 
-def get_location_details(loc_ids):
+def get_location_details(loc_ids, session):
     """
     Get Location Details
 
     :param loc_ids: location ids
+    :param session: Database session
     :return: Location Details
     """
-    locations = query.Query([Location], session=session).filter(
+    locations = session.query(Location).filter(
         Location.loc_id.in_(loc_ids)).all()
     return locations
 
 
-def get_related_persons(tracks):
+def get_related_persons(tracks, session):
     """
     Find outs other individuals who had come to the location on the same day interested individual visited
+
     :param tracks: Individual track details for the selected days
-    :return:
+    :param session: Database session
+    :return: Contacts found at the same location of the person of interest for a given time frame
     """
     query = session.query(TrackerData)
     ands = []
@@ -106,29 +106,32 @@ def get_related_persons(tracks):
     return results
 
 
-def drop_all_tables():
+def drop_all_tables(session):
     """
     Deletes all Tables in the mentioned Schema
+
+    :param session: Database session
     """
+    engine = session.get_bind()
     Base.metadata.drop_all(bind=engine)
 
 
-def create_all_tables():
+def create_all_tables(session):
     """
     Creates db if not created
-    :return:
+
+    :param session: Database session
     """
+    engine = session.get_bind()
     Base.metadata.create_all(bind=engine)
 
 
-def insert_data(new_rows):
+def insert_data(new_rows, session):
     """
-    Updates rows according to the
+    Insert rows into the table
+
     :param new_rows: New Table rows
+    :param session: Database session
     """
     session.bulk_save_objects(new_rows)
     session.commit()
-
-
-create_all_tables()
-

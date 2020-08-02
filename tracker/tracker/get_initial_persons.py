@@ -3,7 +3,7 @@ Helps to Track other person, may come in contact with interested person
 """
 from datetime import date, timedelta
 from tracker.tracker.model import get_track_details, get_related_persons, get_person_details
-from tracker.tracker.visualise_data import create_visualization
+from tracker.tracker.visualise_data import visualization_creation_and_s3_push, convert_visualization_data
 
 
 class Handler(object):
@@ -88,4 +88,5 @@ class TrackerHelper(Handler):
         return persons
 
     def get_visualisation(self):
-        return create_visualization(self)
+        image_data = visualization_creation_and_s3_push(self)
+        return convert_visualization_data(image_data=image_data)

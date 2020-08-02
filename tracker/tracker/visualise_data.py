@@ -2,16 +2,20 @@
 Helps to visualize the relationship
 """
 import os
+import io
 import time
+import boto3
 import networkx as nx
 import matplotlib.pyplot as plt
-from tracker.tracker import utils
+import base64
 
 
-def create_visualization(tracker):
+def visualization_creation_and_s3_push(tracker, aws_push=True):
     """
     Creates a visualization for direct contacts for the given peron
+
     :param tracker: Tracker details of the Person
+    :param aws_push: S3 push required or not
     :return: Image
     """
     graph = nx.DiGraph()
@@ -23,12 +27,26 @@ def create_visualization(tracker):
 
     pos = nx.spring_layout(graph)
     nx.draw(graph, pos, with_labels=True, arrows=False)
-
     time_str = time.strftime("%Y%m%d-%H%M%S")
     image_name = '{}_track_{}.png'.format(tracker.person_id, time_str)
-    output_dir = os.environ['TRACKER_GRAPH_FOLDER']
-    path = output_dir + r'\\' + image_name
-    utils.delete_file_if_exists(path)
-    plt.savefig(path)
-    temp_out = os.environ['TRACKER_HTTP_SERVER'] + r'/' + image_name
-    return temp_out
+    image_data = io.BytesIO()
+    plt.savefig(image_data, format='png')
+    image_data.seek(0)
+    if aws_push and 'TRACKER_AWS_S3_BUCKET' in os.environ:
+        aws_bucket = os.environ['TRACKER_AWS_S3_BUCKET']
+        s3_client = boto3.client('s3')
+        s3_client.put_object(Body=image_data, ContentType='image/png',
+                             Bucket=aws_bucket, Key=image_name)
+    image_data.seek(0)
+    return image_data
+
+
+def convert_visualization_data(image_data):
+    """
+    Convert image value for depicting image in html
+
+    :param image_data: image binary data
+    """
+    image_png = base64.b64encode(image_data.getvalue()).decode('ascii')
+    return image_png
+

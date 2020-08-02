@@ -19,7 +19,7 @@ def handle_tracker(session, person_id, days):
     :param person_id: Social Number of the Individual
     :param days: Days considered for tracking
     """
-    error, connected_identities_str, path = None, "No connections Found", None
+    error, connected_identities_str, image_data = None, "No connections Found", None
     try:
         if not days:
             days = 0
@@ -33,7 +33,7 @@ def handle_tracker(session, person_id, days):
                                                          no_of_days=days,
                                                          session=session)
             if tracking.identity_validation:
-                path = tracking.get_visualisation()
+                image_data = tracking.get_visualisation()
                 connections = tracking.get_persons_related
                 if connections:
                     connected_identities = {identity.social_no for identity in connections}
@@ -43,7 +43,7 @@ def handle_tracker(session, person_id, days):
     except Exception as e:
         error = e
     finally:
-        return error, connected_identities_str, path
+        return error, connected_identities_str, image_data
 
 
 @app.route("/tracker", methods=["GET", "POST"])
@@ -53,12 +53,13 @@ def tracker():
     """
     days = request.form['number_of_days']
     social_number = request.form['social_security_number']
-    error, connected_identities_str, path = \
+    error, connected_identities_str, image_data = \
         handle_tracker(person_id=social_number, days=days)
     if error:
         return render_template('exception.html', message=error)
+    print(image_data)
     return render_template('tracker_results.html',
-                           path=path,
+                           image_data=image_data,
                            connected_identities=connected_identities_str,
                            social_no=social_number)
 
@@ -120,4 +121,4 @@ def load_files():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(port=80)

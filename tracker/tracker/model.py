@@ -106,26 +106,6 @@ def get_related_persons(tracks, session):
     return results
 
 
-def drop_all_tables(session):
-    """
-    Deletes all Tables in the mentioned Schema
-
-    :param session: Database session
-    """
-    engine = session.get_bind()
-    Base.metadata.drop_all(bind=engine)
-
-
-def create_all_tables(session):
-    """
-    Creates db if not created
-
-    :param session: Database session
-    """
-    engine = session.get_bind()
-    Base.metadata.create_all(bind=engine)
-
-
 def insert_data(new_rows, session):
     """
     Insert rows into the table
@@ -135,3 +115,5 @@ def insert_data(new_rows, session):
     """
     session.bulk_save_objects(new_rows)
     session.commit()
+
+

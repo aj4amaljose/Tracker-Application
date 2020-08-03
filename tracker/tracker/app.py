@@ -1,8 +1,10 @@
 """
 Handles UI using Flask Application
 """
+import io
 from flask import Flask, render_template, request
-from tracker.tracker import get_initial_persons, configurations, load_data, constants, session_helper
+from tracker.tracker import get_initial_persons, \
+    configurations, load_data, constants, session_helper, utils
 from sqlalchemy import create_engine
 
 
@@ -56,7 +58,6 @@ def tracker():
         handle_tracker(person_id=social_number, days=days)
     if error:
         return render_template('exception.html', message=error)
-    print(image_data)
     return render_template('tracker_results.html',
                            image_data=image_data,
                            connected_identities=connected_identities_str,
@@ -86,38 +87,51 @@ def mode_selection():
 
 
 @session_helper.create_session(engine=create_engine(configurations.POI_PG_DB_CONNECTION))
-def handle_import(session, dir_path):
+def handle_import(session, file, table_name):
     """
     Validates and handles database import
 
-    :param dir_path: Directory path from UI
+    :param file: Selected file from UI
     :param session: Database Session
+    :param table_name: Table Name
     """
-    error, files_str = None, ''
+    error = None
     try:
-        if dir_path:
-            uploaded_files = load_data.load_files_in_a_folder(dir_path=dir_path, session=session)
-            files_str = ','.join(uploaded_files) if uploaded_files else None
+        if file and file.filename.endswith('.csv'):
+            byte_file_obj = io.BytesIO()
+            file.save(dst=byte_file_obj)
+            file_obj = utils.covert_byte_io_obj_to_string_io_obj(
+                byte_obj=byte_file_obj)
+            error = load_data.import_csv(file_obj, table_name, session)
+        elif file and not file.filename.endswith('.csv'):
+            error = constants.WRONG_FILE_FORMAT
         else:
-            error = constants.MISSING_DIR
+            error = constants.NO_FILES
     except Exception as e:
         error = e
     finally:
-        return error, files_str
+        return error
 
 
-@app.route("/load_files", methods=["GET", "POST"])
+@app.route("/uploader", methods=["GET", "POST"])
 def load_files():
     """
     Loads data and renders HTML
     """
-    dir_path = request.form['directory_path']
-    error, files_str = handle_import(dir_path)
-    if error:
-        return render_template('exception.html', message=error)
-    else:
-        return render_template('success_update.html', files=files_str)
+    file_str = None
+    if request.method == 'POST':
+        file = request.files['file']
+        table_name = request.form['table']
+        file_str = file.filename
+        error = handle_import(file=file, table_name=table_name)
+
+        if error:
+            if 'invalid keyword argument' in str(error):
+                error = constants.WRONG_FILE_HEADERS
+            return render_template('exception.html', message=error)
+
+    return render_template('success_update.html', files=file_str)
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(configurations.POI_APP_PORT))
+    app.run(port=int(configurations.POI_APP_PORT), debug=True)

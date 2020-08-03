@@ -1,22 +1,18 @@
-<!DOCTYPE HTML>
 <html>
-<head>
-    <style>
-.center {
-  margin: auto;
-  width: 60%;
-  border: 3px solid #73AD21;
-  padding: 10px;
-}
-    </style>
-</head>
 <body>
-<form action="/load_files" method="post">
-    <div class="centre">
-        <h2 style="background-color: green; color: white;">Directory Path</h2>
-        <input type="text" name="directory_path"/>
-        <input type="submit" value="Submit"/>
-    </div>
+<h1 style="background-color: green; color: white">File Upload</h1>
+<form action="/uploader" method="POST"
+      enctype="multipart/form-data">
+
+    <label for="table">Table</label>
+    <select name="table" id="table">
+        <option value="identity">Identity</option>
+        <option value="location">Location</option>
+        <option value="tracker">Tracker</option>
+    </select>
+    csv File
+    <input type="file" name="file"/>
+    <input type="submit" name="upload" value="Upload"/>
 </form>
 </body>
 </html>

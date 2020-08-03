@@ -7,9 +7,9 @@ from datetime import datetime
 from tracker.tracker import model
 
 FILE_MAPPING = {
-    'identity_data': model.Identity,
-    'location_data': model.Location,
-    'tracker_data': model.TrackerData
+    'identity': model.Identity,
+    'location': model.Location,
+    'tracker': model.TrackerData
 }
 
 
@@ -34,52 +34,32 @@ def read_file(csv_file_path, metadata):
     :param metadata: Table metadata
     :return: Rows to be imported
     """
-    with open(csv_file_path, newline='') as csvfile:
-        reader = csv.DictReader(csvfile)
-        import_rows = []
-        for row in reader:
-            cleanse_data(row_data=row)
-            import_rows.append(metadata(**row))
+    reader = csv.DictReader(csv_file_path)
+    import_rows = []
+    for row in reader:
+        cleanse_data(row_data=row)
+        import_rows.append(metadata(**row))
     return import_rows
 
 
-def import_csv(csv_path, session):
+def import_csv(file_data, table_name, session):
     """
     Import CSV to the mapped tables
 
-    :param csv_path: File path of the csv
+    :param file_data: Im memory file data
+    :param table_name: Name of the table
     :param session: Database Session
+    :return error: execution error
     """
-    load = False
+    error = None
     try:
         for key in FILE_MAPPING.keys():
-            if key in csv_path:
+            if key in table_name:
                 metadata = FILE_MAPPING.get(key)
                 if metadata:
-                    import_rows = read_file(csv_path, metadata)
+                    import_rows = read_file(file_data, metadata)
                     model.insert_data(import_rows, session=session)
-                    load = True
     except Exception as e:
-        load = False
-        print(e)
+        error = e
     finally:
-        return load
-
-
-def load_files_in_a_folder(dir_path, session):
-    """
-    Load files in a folder to db
-
-    :param dir_path: Directory full path
-    :param session: Database session
-    """
-    files = [path.join(dir_path, f) for f in listdir(dir_path) if path.isfile(path.join(dir_path, f))
-             and f.endswith('.csv')]
-    loaded_files = []
-    for file in files:
-        status = import_csv(csv_path=file, session=session)
-        if status:
-            file_name = path.basename(file)
-            loaded_files.append(file_name)
-    return loaded_files
-
+        return error

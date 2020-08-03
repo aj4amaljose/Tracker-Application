@@ -1,16 +1,15 @@
 """
 Handles UI using Flask Application
 """
-import os
 from flask import Flask, render_template, request
-from tracker.tracker import get_initial_persons, load_data, constants, session_helper
+from tracker.tracker import get_initial_persons, configurations, load_data, constants, session_helper
 from sqlalchemy import create_engine
 
 
 app = Flask(__name__)
 
 
-@session_helper.create_session(engine=create_engine(os.environ['TRACKER_DB_URL']))
+@session_helper.create_session(engine=create_engine(configurations.POI_PG_DB_CONNECTION))
 def handle_tracker(session, person_id, days):
     """
     Validates and run tracker search for the input
@@ -34,9 +33,9 @@ def handle_tracker(session, person_id, days):
                                                          session=session)
             if tracking.identity_validation:
                 image_data = tracking.get_visualisation()
-                connections = tracking.get_persons_related
-                if connections:
-                    connected_identities = {identity.social_no for identity in connections}
+                connected_nodes = tracking.get_persons_related
+                if connected_nodes:
+                    connected_identities = {identity.social_no for identity in connected_nodes}
                     connected_identities_str = ','.join(connected_identities)
             else:
                 error = constants.MISSING_IDENTITY
@@ -86,7 +85,7 @@ def mode_selection():
         return render_template('tracker.html')
 
 
-@session_helper.create_session(engine=create_engine(os.environ['TRACKER_DB_URL']))
+@session_helper.create_session(engine=create_engine(configurations.POI_PG_DB_CONNECTION))
 def handle_import(session, dir_path):
     """
     Validates and handles database import
@@ -121,4 +120,4 @@ def load_files():
 
 
 if __name__ == '__main__':
-    app.run(port=80)
+    app.run(port=int(configurations.POI_APP_PORT))

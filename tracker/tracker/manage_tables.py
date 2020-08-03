@@ -1,13 +1,12 @@
 """
 Module to create or delete the table
 """
-import os
 import argparse
 from sqlalchemy import create_engine
-from tracker.tracker import model
+from tracker.tracker import configurations, model
 
 engine_model_mappings = {
-    'tracker_data': [create_engine(os.environ['TRACKER_DB_URL']), model]
+    'tracker_data': [create_engine(configurations.POI_PG_DB_CONNECTION), model]
 }
 
 

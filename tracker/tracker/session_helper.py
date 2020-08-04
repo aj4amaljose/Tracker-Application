@@ -20,7 +20,7 @@ def session_scope(session):
         session.close()
 
 
-def create_session(engine):
+def create_session(engine, dispose=True):
     """
     Create session in Database
     """
@@ -31,7 +31,10 @@ def create_session(engine):
         @functools.wraps(func)
         def process(*args, **kwargs):
             with session_scope(session):
-                return func(session, *args, **kwargs)
+                result = func(session, *args, **kwargs)
+                if dispose:
+                    engine.dispose()
+                return result
 
         return process
 

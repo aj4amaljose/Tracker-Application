@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from tracker.tracker import configurations, model
 
 engine_model_mappings = {
-    'tracker_data': [create_engine(configurations.POI_PG_DB_CONNECTION), model]
+    'tracker_data': [configurations.POI_PG_DB_CONNECTION, model]
 }
 
 
@@ -34,6 +34,8 @@ if __name__ == '__main__':
                         required=True)
     args = parser.parse_args()
     for schema in engine_model_mappings.keys():
-        engine = engine_model_mappings[schema][0]
+        db_url = engine_model_mappings[schema][0]
         model = engine_model_mappings[schema][1]
+        engine = create_engine(configurations.POI_PG_DB_CONNECTION)
         manage_all_tables(action=args.action, db_engine=engine, db_model=model)
+        engine.dispose()

@@ -1,0 +1,168 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-storage
+provisioner: kubernetes.io/no-provisioner
+
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: postgres-pv
+  labels:
+    app: postgres
+    type: local
+spec:
+  storageClassName: local-storage
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/var/data"
+
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: postgres-pv-claim
+  labels:
+    app: postgres
+spec:
+  storageClassName: local-storage
+  capacity:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-statefulset
+  labels:
+    app: postgres
+spec:
+  serviceName: "postgres"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:12
+        envFrom:
+        - configMapRef:
+            name: postgres-configuration
+        ports:
+        - containerPort: 5432
+          name: postgresdb
+        volumeMounts:
+        - name: pv-data
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: pv-data
+        persistentVolumeClaim:
+          claimName: postgres-pv-claim
+          
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  labels:
+    app: postgres
+spec:
+  ports:
+  - port: 5432
+    nodePort: 32408
+    name: postgres
+  type: NodePort 
+  selector:
+    app: postgres
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: poi-configuration
+  labels:
+    app: poi
+data:
+  POSTGRES_SERVICE: postgres-service
+  POSTGRES_PORT: "5432"
+  POI_APP_PORT: "5000"
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  generation: 1
+  labels:
+    app: poi
+  name: poi-tracker
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: poi
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: poi
+    spec:
+      containers:
+      - image: amaljose4/poi-tracker:latest
+        imagePullPolicy: Never
+        name: poi-tracker
+        ports: 
+        - containerPort: 5000
+        envFrom:
+        - secretRef:
+            name: postgres-secret 
+        - configMapRef:
+            name: poi-configuration 
+        - secretRef:
+            name: poi-aws-secret
+         
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: poi
+  name: poi-service
+  namespace: default
+spec:
+  ports:
+  - name: poi
+    nodePort: 30216
+    port: 5000
+    protocol: TCP
+    targetPort: 5000
+  selector:
+    app: poi
+  sessionAffinity: None
+  type: NodePort
+        
